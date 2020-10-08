@@ -9,7 +9,7 @@ const Todo = () => {
     return (
         <Layout className="layout">
             <Header className="header-app">
-                {/* <h1>Đồ án tốt nghiệp - Ứng dụng tạo một App TodoList</h1> */}
+                <h1>Đồ án tốt nghiệp - Ứng dụng tạo một App TodoList</h1>
             </Header>
             <Content style={{ padding: '0 50px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>

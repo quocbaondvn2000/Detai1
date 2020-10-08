@@ -7,6 +7,7 @@ import './style.todo.css';
 
 const { Option } = Select;
 const { confirm } = Modal;
+const { Search } = Input;
 const format = 'HH:mm';
 
 const Content = () => {
@@ -20,7 +21,9 @@ const Content = () => {
     const [actionEdit, setActionEdit] = useState('Add');
     const [titleEdit, setTitleEdit] = useState('Add a todo');
     const [dataLocal, setDataLocal] = useState([]);
+    const [filterTable, setFilterTable] = useState(null);
     const [dataEdit, setDataEdit] = useState({});
+    const [valueFilter, setValueFilter] = useState("");
 
     useEffect(() => {
         setDataLocal(JSON.parse(reactLocalStorage.get('todo_lists')) || []);
@@ -45,14 +48,13 @@ const Content = () => {
         else {
             const newArray = dataLocal.map((item) => {
                 if (item.key === dataEdit.key) {
-                    return {key: item.key, ...values};
+                    return { key: item.key, ...values };
                 } else {
                     return item;
                 }
             });
             setDataLocal(newArray);
             saveLocal(newArray);
-            
             // console.log(newArray);
         }
     }
@@ -61,6 +63,45 @@ const Content = () => {
     const saveLocal = (data) => {
         reactLocalStorage.setObject('todo_lists', data);
     }
+
+    const onSearch = value => {
+        // const _filterTable = dataLocal.filter(o =>
+        //     Object.keys(o).some(k =>
+        //         String(o[k])
+        //             .toLowerCase()
+        //             .includes(value.toLowerCase())
+        //     )
+        // );
+        // setFilterTable(_filterTable);
+    };
+
+     // function header
+     const Header = () => (
+        <PageHeader
+            className="header-table"
+            title={
+                <Search
+                    // value={valueFilter}
+                    placeholder="Search in todo list"
+                    onSearch={value =>  onSearch(value) }
+                    // onChange={e => setValueFilter(e.target.value)}
+                    style={{ width: 360 }}
+                    allowClear={true}
+                />
+            }
+            extra={[
+                <Tooltip title="Click here to add a new todo" key="1" >
+                    <Button type="primary" icon={<PlusOutlined />}
+                        onClick={() => {
+                            fnOpenEdit(true);
+                            setActionEdit('Add');
+                        }}>
+                        Add new todo
+                </Button>
+                </Tooltip>
+            ]}
+        />)
+
 
     const Edit = () => {
         const [form] = Form.useForm();
@@ -158,51 +199,32 @@ const Content = () => {
                 saveLocal(newArray);
             },
         });
-    };
-
-    // function header
-    const Header = () => (
-        <PageHeader
-            className="header-table"
-            title={
-                <Input placeholder="Search in todo list"
-                    style={{ width: 360 }}
-                    suffix={<Tooltip title="Looking for a todo"><SearchOutlined /></Tooltip>}
-                />
-            }
-            extra={[
-                <Tooltip title="Click here to add a new todo" key="1" >
-                    <Button type="primary" icon={<PlusOutlined />}
-                        onClick={() => {
-                            fnOpenEdit(true);
-                            setActionEdit('Add');
-                        }}>
-                        Add new todo
-                </Button>
-                </Tooltip>
-            ]}
-        />)
+    };   
 
     const columns = [
         {
             title: '#',
             width: 35,
-            render: (text, record) => (dataLocal.indexOf(record) + 1)
+            render: (text, record) => (dataLocal.indexOf(record) + 1),
         },
         {
             title: 'Time',
             dataIndex: 'time',
             width: 120,
-            key: 'age',
+            key: 'time',
             render: (text) => (
                 <p style={{ margin: "0px" }}><ClockCircleOutlined /> {moment(text).format("HH:mm")}</p>
-            )
+            ),
+            sorter: (a, b) => moment(a.time).unix() - moment(b.time).unix(),
+            sortDirections: ['descend', 'ascend'],
         },
         {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
             render: text => <b>{text}</b>,
+            sorter: (a, b) => a.name.length - b.name.length,
+            sortDirections: ['descend', 'ascend'],
         },
         {
             title: 'Level',
@@ -255,6 +277,7 @@ const Content = () => {
         <div>
             <Table
                 columns={columns}
+                dataSource={valueFilter === "" ? dataLocal : filterTable}
                 dataSource={dataLocal}
                 bordered={true}
                 title={() => <Header />}
