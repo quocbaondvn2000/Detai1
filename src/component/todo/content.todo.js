@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Space, PageHeader, Button, Tooltip, Input, Modal, TimePicker, Form, Select, message } from 'antd';
-import { PlusOutlined, SearchOutlined, FormOutlined, DeleteOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, FormOutlined, DeleteOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import './style.todo.css';
 
 const { Option } = Select;
+const { confirm } = Modal;
+const format = 'HH:mm';
 
 const Content = () => {
 
@@ -18,6 +20,7 @@ const Content = () => {
     const [actionEdit, setActionEdit] = useState('Add');
     const [titleEdit, setTitleEdit] = useState('Add a todo');
     const [dataLocal, setDataLocal] = useState([]);
+    const [dataEdit, setDataEdit] = useState({});
 
     useEffect(() => {
         setDataLocal(JSON.parse(reactLocalStorage.get('todo_lists')) || []);
@@ -39,8 +42,19 @@ const Content = () => {
             setDataLocal(_dataLocal);
             saveLocal(_dataLocal);
         }
-        else
-            console.log(values);
+        else {
+            const newArray = dataLocal.map((item) => {
+                if (item.key === dataEdit.key) {
+                    return {key: item.key, ...values};
+                } else {
+                    return item;
+                }
+            });
+            setDataLocal(newArray);
+            saveLocal(newArray);
+            
+            // console.log(newArray);
+        }
     }
 
     // hàm lưu dữ liệu vào local tham số truyền vào là  data
@@ -50,6 +64,22 @@ const Content = () => {
 
     const Edit = () => {
         const [form] = Form.useForm();
+
+        useEffect(() => {
+            if (actionEdit === "Edit" && openEdit === true) {
+                console.log(dataEdit);
+                form.setFieldsValue({
+                    time: moment(dataEdit.time, format),
+                    key: dataEdit.key,
+                    level: dataEdit.level,
+                    name: dataEdit.name,
+                    status: dataEdit.status
+                });
+            } else {
+                form.resetFields();
+            }
+        }, [openEdit, actionEdit, dataEdit])
+
         return (
             <Modal
                 title={titleEdit}
@@ -79,7 +109,7 @@ const Content = () => {
                         name="time"
                         rules={[{ required: true, message: 'Please select your time !' }]}
                     >
-                        <TimePicker />
+                        <TimePicker format={format} />
                     </Form.Item>
 
                     <Form.Item
@@ -118,16 +148,24 @@ const Content = () => {
     }
 
     // function delete
-    const Delete = () => {
-
-    }
+    const onDelete = (key) => {
+        confirm({
+            icon: <ExclamationCircleOutlined />,
+            content: <label>Bạn có chắc xóa dữ liệu này không?</label>,
+            onOk() {
+                const newArray = dataLocal.filter(item => item.key !== key);
+                setDataLocal(newArray);
+                saveLocal(newArray);
+            },
+        });
+    };
 
     // function header
     const Header = () => (
         <PageHeader
             className="header-table"
             title={
-                <Input placeholder="Search..."
+                <Input placeholder="Search in todo list"
                     style={{ width: 360 }}
                     suffix={<Tooltip title="Looking for a todo"><SearchOutlined /></Tooltip>}
                 />
@@ -157,7 +195,7 @@ const Content = () => {
             width: 120,
             key: 'age',
             render: (text) => (
-                <p style={{margin: "0px"}}><ClockCircleOutlined /> {moment(text).format("HH:mm:ss")}</p>
+                <p style={{ margin: "0px" }}><ClockCircleOutlined /> {moment(text).format("HH:mm")}</p>
             )
         },
         {
@@ -198,36 +236,21 @@ const Content = () => {
             align: 'center',
             render: (text, record) => (
                 <Space size="middle">
-                    <Button type="primary" ghost size="small" icon={<FormOutlined />}>Edit</Button>
-                    <Button size="small" danger icon={<DeleteOutlined />}>Delete</Button>
+                    <Button type="primary" ghost size="small" icon={<FormOutlined />}
+                        onClick={() => {
+                            fnOpenEdit(true);
+                            setActionEdit('Edit');
+                            setDataEdit(record);
+                        }}
+                    >Edit</Button>
+                    <Button size="small" danger icon={<DeleteOutlined />}
+                        onClick={() => onDelete(record.key)}
+                    >Delete</Button>
                 </Space>
             ),
         },
     ];
 
-    const data = [
-        {
-            key: '1',
-            name: 'John Brown',
-            age: 32,
-            address: 'New York No. 1 Lake Park',
-            tags: ['nice', 'developer'],
-        },
-        {
-            key: '2',
-            name: 'Jim Green',
-            age: 42,
-            address: 'London No. 1 Lake Park',
-            tags: ['loser'],
-        },
-        {
-            key: '3',
-            name: 'Joe Black',
-            age: 32,
-            address: 'Sidney No. 1 Lake Park',
-            tags: ['cool', 'teacher'],
-        },
-    ];
     return (
         <div>
             <Table
