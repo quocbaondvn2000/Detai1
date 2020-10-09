@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Space, PageHeader, Button, Tooltip, Input, Modal, TimePicker, Form, Select, message } from 'antd';
-import { PlusOutlined, SearchOutlined, FormOutlined, DeleteOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, FormOutlined, DeleteOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import './style.todo.css';
@@ -8,9 +8,10 @@ import './style.todo.css';
 const { Option } = Select;
 const { confirm } = Modal;
 const { Search } = Input;
-const format = 'HH:mm';
 
 const Content = () => {
+
+    const format = 'HH:mm';
 
     const layout = {
         labelCol: { span: 6 },
@@ -64,43 +65,47 @@ const Content = () => {
         reactLocalStorage.setObject('todo_lists', data);
     }
 
-    const onSearch = value => {
-        // const _filterTable = dataLocal.filter(o =>
-        //     Object.keys(o).some(k =>
-        //         String(o[k])
-        //             .toLowerCase()
-        //             .includes(value.toLowerCase())
-        //     )
-        // );
-        // setFilterTable(_filterTable);
-    };
+    const Header = () => {
+        // const [valueFilter, setValueFilter] = useState("");
 
-     // function header
-     const Header = () => (
-        <PageHeader
-            className="header-table"
-            title={
-                <Search
-                    // value={valueFilter}
-                    placeholder="Search in todo list"
-                    onSearch={value =>  onSearch(value) }
-                    // onChange={e => setValueFilter(e.target.value)}
-                    style={{ width: 360 }}
-                    allowClear={true}
-                />
-            }
-            extra={[
-                <Tooltip title="Click here to add a new todo" key="1" >
-                    <Button type="primary" icon={<PlusOutlined />}
-                        onClick={() => {
-                            fnOpenEdit(true);
-                            setActionEdit('Add');
-                        }}>
-                        Add new todo
+        const onSearch = value => {
+            const _filterTable = dataLocal.filter(o =>
+                Object.keys(o).some(k =>
+                    String(o[k])
+                        .toLowerCase()
+                        .includes(value.toLowerCase())
+                )
+            );
+            setFilterTable(_filterTable);
+        };
+
+        return (
+            <PageHeader
+                className="header-table"
+                title={
+                    <Search
+                        autoFocus
+                        onChange={e => setValueFilter(e.target.value)}
+                        value={valueFilter}
+                        placeholder="Search in todo list"
+                        onSearch={value => onSearch(value)}
+                        style={{ width: 360 }}
+                        allowClear={true}
+                    />
+                }
+                extra={[
+                    <Tooltip title="Click here to add a new todo" key="1" >
+                        <Button type="primary" icon={<PlusOutlined />}
+                            onClick={() => {
+                                fnOpenEdit(true);
+                                setActionEdit('Add');
+                            }}>
+                            Add new todo
                 </Button>
-                </Tooltip>
-            ]}
-        />)
+                    </Tooltip>
+                ]}
+            />)
+    }
 
 
     const Edit = () => {
@@ -199,7 +204,7 @@ const Content = () => {
                 saveLocal(newArray);
             },
         });
-    };   
+    };
 
     const columns = [
         {
@@ -277,8 +282,7 @@ const Content = () => {
         <div>
             <Table
                 columns={columns}
-                dataSource={valueFilter === "" ? dataLocal : filterTable}
-                dataSource={dataLocal}
+                dataSource={filterTable === null ? dataLocal : filterTable}
                 bordered={true}
                 title={() => <Header />}
             />
