@@ -27,7 +27,13 @@ const Content = () => {
     const [valueFilter, setValueFilter] = useState("");
 
     useEffect(() => {
-        setDataLocal(JSON.parse(reactLocalStorage.get('todo_lists')) || []);
+        const todo_list = reactLocalStorage.get('todo_lists');
+        if(todo_list){
+            // console.log(todo_list);
+            setDataLocal(JSON.parse(todo_list));
+        }else{
+            setDataLocal([]);
+        }
     }, [])
 
     // function edit
