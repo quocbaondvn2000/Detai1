@@ -20,7 +20,7 @@ const Content = () => {
 
     const [openEdit, setOpenEdit] = useState(false);
     const [actionEdit, setActionEdit] = useState('Add');
-    const [titleEdit, setTitleEdit] = useState('Add a todo');
+    const [titleEdit, setTitleEdit] = useState('Edit a todo');
     const [dataLocal, setDataLocal] = useState([]);
     const [filterTable, setFilterTable] = useState(null);
     const [dataEdit, setDataEdit] = useState({});
@@ -38,9 +38,7 @@ const Content = () => {
 
     // function edit
     const fnOpenEdit = (val) => {
-        setOpenEdit(val);
-        if (actionEdit === 'Add') setTitleEdit('Add a todo')
-        else setTitleEdit('Edit todo list')
+        setOpenEdit(val);     
     }
 
     // function create
@@ -119,7 +117,8 @@ const Content = () => {
 
         useEffect(() => {
             if (actionEdit === "Edit" && openEdit === true) {
-                console.log(dataEdit);
+                setTitleEdit('Edit a todo');
+                // console.log(dataEdit);
                 form.setFieldsValue({
                     time: moment(dataEdit.time, format),
                     key: dataEdit.key,
@@ -128,8 +127,10 @@ const Content = () => {
                     status: dataEdit.status
                 });
             } else {
+                setTitleEdit('Add todo list');
                 form.resetFields();
             }
+
         }, [openEdit, actionEdit, dataEdit])
 
         return (
