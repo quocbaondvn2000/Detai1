@@ -3,6 +3,8 @@ import { Table, Tag, Space, PageHeader, Button, Tooltip, Input, Modal, TimePicke
 import { PlusOutlined, FormOutlined, DeleteOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { reactLocalStorage } from 'reactjs-localstorage';
+import Notification from 'react-web-notification'; //https://github.com/mobilusoss/react-web-notification/blob/develop/example/app.js
+
 import './style.todo.css';
 
 const { Option } = Select;
@@ -25,20 +27,21 @@ const Content = () => {
     const [filterTable, setFilterTable] = useState(null);
     const [dataEdit, setDataEdit] = useState({});
     const [valueFilter, setValueFilter] = useState("");
+    const [ignoreNotification, setIgnoreNotification] = useState(true);
 
     useEffect(() => {
         const todo_list = reactLocalStorage.get('todo_lists');
-        if(todo_list){
+        if (todo_list) {
             // console.log(todo_list);
             setDataLocal(JSON.parse(todo_list));
-        }else{
+        } else {
             setDataLocal([]);
         }
     }, [])
 
     // function edit
     const fnOpenEdit = (val) => {
-        setOpenEdit(val);     
+        setOpenEdit(val);
     }
 
     // function create
@@ -101,8 +104,11 @@ const Content = () => {
                     <Tooltip title="Click here to add a new todo" key="1" >
                         <Button type="primary" icon={<PlusOutlined />}
                             onClick={() => {
-                                fnOpenEdit(true);
-                                setActionEdit('Add');
+                                setTimeout(() => {
+                                    setIgnoreNotification(false); 
+                                }, 3000);                               
+                                // fnOpenEdit(true);
+                                // setActionEdit('Add');
                             }}>
                             Add new todo
                 </Button>
@@ -294,6 +300,31 @@ const Content = () => {
                 title={() => <Header />}
             />
             <Edit />
+            <Notification
+                // ignore={this.state.ignore && this.state.title !== ''}
+                ignore={ignoreNotification}
+                // notSupported={this.handleNotSupported.bind(this)}
+                // onPermissionGranted={this.handlePermissionGranted.bind(this)}
+                // onPermissionDenied={this.handlePermissionDenied.bind(this)}
+                // onShow={this.handleNotificationOnShow.bind(this)}
+                // onClick={this.handleNotificationOnClick.bind(this)}
+                // onClose={this.handleNotificationOnClose.bind(this)}
+                // onError={this.handleNotificationOnError.bind(this)}
+
+                onClick={()=>{
+                    alert("click");
+                }}
+
+                onClose={()=>{
+                    alert("close");
+                    setIgnoreNotification(true);
+                }}
+
+                timeout={5000}
+                title={title}
+            // options={this.state.options}
+            // swRegistration={this.props.swRegistration}
+            />
         </div>
     );
 };

@@ -10,6 +10,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
+    "react-web-notification": "^0.8.0",
     "reactjs-localstorage": "^1.0.1"
   },
   "scripts": {
